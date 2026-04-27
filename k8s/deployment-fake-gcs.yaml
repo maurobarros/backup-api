@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fake-gcs-deployment
+  labels:
+    app: fake-gcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fake-gcs
+  template:
+    metadata:
+      labels:
+        app: fake-gcs
+    spec:
+      containers:
+        - name: fake-gcs
+          image: fsouza/fake-gcs-server:latest
+          args:
+            - "-scheme"
+            - "http"
+            - "-public-host"
+            - "fake-gcs-service:4443"
+          ports:
+            - containerPort: 4443

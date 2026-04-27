@@ -1,0 +1,56 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/backupdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/backup-api-key.json
+      - STORAGE_EMULATOR_HOST=http://fake-gcs:4443
+    volumes:
+      - ./backup-api-key.json:/app/backup-api-key.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      fake-gcs:
+        condition: service_started
+    networks:
+      - backup-net
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=backupdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d backupdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backup-net
+
+  fake-gcs:
+    image: fsouza/fake-gcs-server:latest
+    ports:
+      - "4443:4443"
+    command: ["-scheme", "http", "-public-host", "fake-gcs:4443"]
+    volumes:
+      - ./fake-gcs-data:/data
+    networks:
+      - backup-net
+
+volumes:
+  postgres_data:
+
+networks:
+  backup-net:
+    driver: bridge

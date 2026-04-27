@@ -1,0 +1,33 @@
+# Build output
+target/
+*.jar
+!target/*.jar
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Maven wrapper (se não usares)
+.mvn/
+
+# Credenciais — NUNCA na imagem
+backup-api-key.json
+*.pem
+*.key
+
+# Docker / compose (não precisam dentro da imagem)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs e temporários
+*.log
+.DS_Store
+
+# Documentação
+README.md
